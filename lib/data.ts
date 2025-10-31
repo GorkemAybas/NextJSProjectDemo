@@ -25,29 +25,36 @@ export const faturalar = [
 const PAGE_SIZE = 6;
 
 export async function geliriGetir() {
-  console.log("yapay gecikme ile gelir getiriliyor...");
+  try {
+     // throw new Error('TEST: geliriGetir hata simülasyonu');
+    console.log("yapay gecikme ile gelir getiriliyor...");
   return new Promise<number>((resolve) => {
     setTimeout(() => {
       const toplam = faturalar.reduce((acc, fatura) => acc + fatura.tutar, 0);
       console.log("işlem tamamlandı");
       resolve(toplam);
     }, 3000);
-  });
-}
+  });} catch(error){console.log("hata geliriGetir fonksiyonunda :", error); return 0;  
+} }
 
 export async function sonfaturalargetir() {
-  return new Promise<typeof faturalar>((resolve) => {
+  try{return new Promise<typeof faturalar>((resolve) => {
     setTimeout(() => {
       resolve(faturalar.slice(-2));
     }, 700);
-  });
+  });} catch(error){console.log("hata sonfaturalargetir fonksiyonunda :", error); return[];}
+  
 }
 
 export async function kartverilerinigetir() {
-  const toplamfaturalar = faturalar.length;
+ 
+  try{const toplamfaturalar = faturalar.length;
   const odendisayisi = faturalar.filter((f) => f.durum === "odendi").length;
   const beklemedesayisi = faturalar.filter((f) => f.durum === "beklemede").length;
-  return { toplamfaturalar, odendisayisi, beklemedesayisi };
+  return { toplamfaturalar, odendisayisi, beklemedesayisi };} 
+  catch(error){console.log("hata kartverilerinigetir fonksiyonunda :", error); 
+    return { toplamfaturalar:0, odendisayisi:0, beklemedesayisi:0 };}
+  
 }
 
 // ...existing code...
@@ -77,5 +84,33 @@ export async function fetchInvoicesPages(query: string) {
       ).length
     : faturalar.length;
   return Math.max(1, Math.ceil(count / PAGE_SIZE));
+}
+// ...existing code...
+// ...existing code...
+export async function fetchInvoiceById(id: string) {
+  try {
+    const nid = Number(id);
+    if (Number.isNaN(nid)) {
+      console.log('fetchInvoiceById: invalid id', id);
+      return null;
+    }
+    const invoice = faturalar.find((f) => f.id === nid) ?? null;
+    console.log('fetchInvoiceById ->', id, invoice);
+    return invoice;
+  } catch (error) {
+    console.error('fetchInvoiceById error:', error);
+    // veritabanı hatası gibi durumlarda üst katmanın yakalaması için throw edebilirsin
+    throw new Error('Failed to fetch invoice.');
+  }
+}
+
+export async function fetchCustomers() {
+  try {
+    // basit demo: müşteri isimlerini döndür
+    return Array.from(new Set(faturalar.map((f) => f.musteri)));
+  } catch (error) {
+    console.error('fetchCustomers error:', error);
+    return [];
+  }
 }
 // ...existing code...
